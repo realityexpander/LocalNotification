@@ -26,13 +26,16 @@ class CounterNotificationService(
             }
         )
 
-        val incrementIntent = Intent(context, CounterNotificationReceiver::class.java)
+        val incrementIntent = Intent(context, CounterNotificationReceiver::class.java).apply {
+            putExtra(EXTRA_INCREMENT_AMOUNT, 5)
+        }
         val incrementPendingIntent = PendingIntent.getBroadcast(
             context,
             102,
             incrementIntent,
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE // prevent crash for API >= 31
+                //PendingIntent.FLAG_IMMUTABLE // prevent crash for API >= 31 // ignores the putExtra
+                PendingIntent.FLAG_UPDATE_CURRENT // prevent crash for API >= 31 // to allow for the putExtra
             } else {
                 0
             }
@@ -46,7 +49,7 @@ class CounterNotificationService(
 //                NotificationCompat.BigTextStyle()
 //                    .bigText("The count is $counter")
 //            )
-            .setContentIntent(activityPendingIntent)
+            .setContentIntent(activityPendingIntent)  // open app when clicked
             .addAction(R.drawable.ic_counter_channel,
                 "Increment",
                 incrementPendingIntent
@@ -59,5 +62,7 @@ class CounterNotificationService(
     companion object {
         const val COUNTER_CHANNEL_ID = "counter_channel"
         const val COUNTER_NOTIFICATION_ID = 1
+
+        const val EXTRA_INCREMENT_AMOUNT = "extra_increment_amount"
     }
 }
